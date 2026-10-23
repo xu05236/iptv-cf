@@ -84,8 +84,11 @@ def line_limit(primary: str) -> int:
     return MAX_LINES
 
 
+EPG_EXPORT_URL = os.environ.get("WORKER_URL", "").rstrip("/") + "/epg.xml"
+
+
 def gen_m3u(channels: dict, name: str = "IPTV") -> str:
-    out = ["#EXTM3U"]
+    out = [f'#EXTM3U x-tvg-url="{EPG_EXPORT_URL}"']
     for primary, ch in sorted(channels.items()):
         for i, e in enumerate(ch["lines"][:line_limit(primary)]):
             grp = e["group_title"] or "未分组"
@@ -185,6 +188,12 @@ def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     upload_r2(f"snapshots/{today}/iptv.m3u", m3u.encode())
     upload_r2(f"snapshots/{today}/iptv.txt", txt.encode())
+
+    # EPG 引用说明文件（播放器单独添加节目单源用，本体由 fetch_epg.py 生成）
+    epg_note = (f"# EPG 节目单地址\n"
+                f"# 在播放器中把下面地址填到 EPG/节目单来源：\n"
+                f"{EPG_EXPORT_URL}\n").encode()
+    upload_r2("publish/epg-source.txt", epg_note)
 
     total_lines = sum(len(ch["lines"]) for ch in channels.values())
     summary = {"channels": len(channels), "total_lines": total_lines,

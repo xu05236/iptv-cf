@@ -1,0 +1,32 @@
+name: EPG 抓取
+on:
+  schedule:
+    # 北京 03:00 和 15:00
+    - cron: '0 19 * * *'
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['聚合导出']
+    types: [completed]
+
+concurrency:
+  group: iptv-epg
+  cancel-in-progress: true
+
+jobs:
+  epg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: 安装依赖
+        run: pip install -r actions/requirements.txt
+      - name: EPG 抓取合并
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: python actions/fetch_epg.py
