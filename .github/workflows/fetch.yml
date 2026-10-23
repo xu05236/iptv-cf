@@ -1,0 +1,31 @@
+name: 采集源
+on:
+  schedule:
+    # UTC 时间：北京 00:15 和 12:15
+    - cron: '15 16 * * *'
+    - cron: '15 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: iptv-fetch
+  cancel-in-progress: true
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: 安装依赖
+        run: pip install -r actions/requirements.txt
+      - name: 采集
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          SOURCE_PROXY: ${{ secrets.SOURCE_PROXY }}
+          SOURCE_PROXY_HOSTS: ${{ secrets.SOURCE_PROXY_HOSTS }}
+        run: python actions/fetch_sources.py

@@ -1,0 +1,39 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "iptv-cf",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-10-01",
+
+  "assets": {
+    "directory": "./assets",
+    "binding": "ASSETS"
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "iptv-cf",
+      "database_id": "REPLACE_ME_D1_ID"
+    }
+  ],
+
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "iptv-cf"
+    }
+  ],
+
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "REPLACE_ME_KV_ID"
+    }
+  ],
+
+  "vars": {
+    "GITHUB_REPO": "REPLACE_ME/REPLACE_ME",
+    "CACHE_TTL_PLAYLIST": 60,
+    "CACHE_TTL_EPG": 3600
+  }
+}

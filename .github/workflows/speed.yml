@@ -1,0 +1,32 @@
+name: 测速
+on:
+  schedule:
+    # 北京 01:30 和 13:30
+    - cron: '30 17 * * *'
+    - cron: '30 5 * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['采集源']
+    types: [completed]
+
+concurrency:
+  group: iptv-speed
+  cancel-in-progress: true
+
+jobs:
+  speed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: 安装依赖
+        run: pip install -r actions/requirements.txt
+      - name: 测速
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: python actions/speed_test.py

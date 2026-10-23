@@ -1,0 +1,32 @@
+aggregate:
+  cctv_patterns:
+  - cctv
+  - cctv4k
+  - cctv8k
+  max_lines_cctv: 10
+  max_lines_per_channel: 5
+epg:
+  days: 7
+  enabled: false
+sources:
+- name: local-test-source
+  proxy_host: false
+  type: m3u
+  url: http://127.0.0.1:8766/sub.m3u
+speed:
+  concurrency: 10
+  max_entries_per_run: 100
+  max_redirects: 3
+  min_steady_bytes: 32768
+  sample_bytes: 1048576
+  slow_window_kbps: 256.0
+  stall_timeout: 12.0
+  timeout: 8.0
+  warmup_bytes: 524288
+statemachine:
+  fail_retest_hours: 20
+  prune_max_fail: 3
+  purge_interval_days: 90
+  purge_min_revive: 1
+  retest_after_days: 14
+  retest_ok_hours: 72

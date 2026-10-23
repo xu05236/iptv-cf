@@ -1,0 +1,32 @@
+name: 聚合导出
+on:
+  schedule:
+    # 北京 02:00 和 14:00
+    - cron: '0 18 * * *'
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['测速']
+    types: [completed]
+
+concurrency:
+  group: iptv-aggregate
+  cancel-in-progress: true
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: 安装依赖
+        run: pip install -r actions/requirements.txt
+      - name: 聚合导出
+        env:
+          WORKER_URL: ${{ secrets.WORKER_URL }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: python actions/aggregate.py
