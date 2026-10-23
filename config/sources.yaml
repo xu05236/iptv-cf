@@ -9,10 +9,14 @@ epg:
   days: 7
   enabled: false
 sources:
-- name: local-test-source
+- name: fanmingming-ipv6
   proxy_host: false
   type: m3u
-  url: http://127.0.0.1:8766/sub.m3u
+  url: https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u
+- name: fanmingming-global
+  proxy_host: false
+  type: m3u
+  url: https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/global.m3u
 speed:
   concurrency: 10
   max_entries_per_run: 100

@@ -1,14 +1,14 @@
 /**
  * iptv-cf Worker
  * 单一通道设计：
- *   - 公开出口：订阅文件（R2 + Cache API，60s TTL）
- *   - 内部 API（Bearer ADMIN_TOKEN）：D1 读写代理 / R2 上传 / purge / 触发 workflow
+ *   - 公开出口：订阅文件（KV + Cache API，60s TTL）
+ *   - 内部 API（Bearer ADMIN_TOKEN）：D1 读写代理 / 上传 / purge / 触发 workflow
  *   - 管理 API（Bearer ADMIN_TOKEN）：源 CRUD
  *   - /admin：静态资产（iOS 风格前端，Phase 6）
  */
 export interface Env {
   DB: D1Database;
-  BUCKET: R2Bucket;
+  BUCKET: KVNamespace;
   KV: KVNamespace;
   ASSETS: Fetcher;
   ADMIN_TOKEN: string;
@@ -33,7 +33,7 @@ function json(data: unknown, status = 200): Response {
 
 function isAdmin(request: Request, env: Env): boolean {
   const auth = request.headers.get("Authorization") || "";
-  return auth === `Bearer ${env.ADMIN_TOKEN}` && env.ADMIN_TOKEN !== "";
+  return auth === "Bearer " + env.ADMIN_TOKEN && env.ADMIN_TOKEN !== "";
 }
 
 async function serveR2WithCache(
@@ -44,16 +44,15 @@ async function serveR2WithCache(
   const cached = await caches.default.match(cacheKey);
   if (cached) return cached;
 
-  const obj = await env.BUCKET.get(key);
-  if (!obj) {
+  const buf = await env.BUCKET.get(key, "arrayBuffer");
+  if (!buf) {
     return json({ error: "not found", key }, 404);
   }
   const headers = new Headers();
-  obj.writeHttpMetadata(headers);
-  headers.set("Cache-Control", `public, max-age=${ttl}`);
-  headers.set("ETag", obj.httpEtag);
+  headers.set("Content-Type", contentTypeFor(key));
+  headers.set("Cache-Control", "public, max-age=" + ttl);
   headers.set(...CORSHeader());
-  const resp = new Response(obj.body, { headers });
+  const resp = new Response(buf, { headers });
   ctx.waitUntil(caches.default.put(cacheKey, resp.clone()));
   return resp;
 }
@@ -99,12 +98,13 @@ export default {
       const counts = await env.DB.prepare(
         "SELECT (SELECT COUNT(*) FROM entries WHERE active=1) AS entries_active," +
         " (SELECT COUNT(*) FROM entries WHERE active=1 AND status='ok') AS entries_ok," +
+
         " (SELECT COUNT(*) FROM channels) AS channels",
       ).first();
       return json({ runs: runs.results, counts });
     }
 
-    // ---------- 内部 API：D1 代理 / R2 上传 / 触发 ----------
+    // ---------- 内部 API：D1 代理 / 上传 / 触发 ----------
     if (path === "/api/internal/d1-query" && isAdmin(request, env)) {
       const body = await request.json<{ sql: string; params?: unknown[] }>();
       const stmt = env.DB.prepare(body.sql);
@@ -143,9 +143,7 @@ export default {
         return json({ error: "bad key" }, 400);
       }
       const data = await request.arrayBuffer();
-      await env.BUCKET.put(key, data, {
-        httpMetadata: { contentType: contentTypeFor(key) },
-      });
+      await env.BUCKET.put(key, data);
       // purge 公开出口的缓存
       const purgeUrls: Record<string, string> = {
         "publish/iptv.m3u": "/iptv.m3u",
@@ -167,11 +165,11 @@ export default {
         return json({ error: "bad workflow" }, 400);
       }
       const resp = await fetch(
-        `https://api.github.com/repos/${env.GITHUB_REPO}/actions/workflows/${body.workflow}.yml/dispatches`,
+        "https://api.github.com/repos/" + env.GITHUB_REPO + "/actions/workflows/" + body.workflow + ".yml/dispatches",
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${env.GH_TOKEN}`,
+            Authorization: "Bearer " + env.GH_TOKEN,
             Accept: "application/vnd.github+json",
             "User-Agent": "iptv-cf-worker",
           },
@@ -179,7 +177,7 @@ export default {
         },
       );
       if (resp.status >= 300) {
-        return json({ error: `github ${resp.status}`, detail: await resp.text() }, 502);
+        return json({ error: "github " + resp.status, detail: await resp.text() }, 502);
       }
       return json({ ok: true, workflow: body.workflow });
     }
@@ -200,7 +198,7 @@ export default {
       if (!body.name || !body.url) {
         return json({ error: "name/url required" }, 400);
       }
-      const slug = `custom:${Date.now().toString(36)}`;
+      const slug = "custom:" + Date.now().toString(36);
       await env.DB.prepare(
         "INSERT INTO sources (id, type, url, name, headers_json, enabled) VALUES (?, ?, ?, ?, ?, 1)",
       ).bind(slug, body.type || "auto", body.url, body.name, body.headers_json || "{}").run();

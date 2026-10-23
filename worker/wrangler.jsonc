@@ -13,26 +13,23 @@
     {
       "binding": "DB",
       "database_name": "iptv-cf",
-      "database_id": "REPLACE_ME_D1_ID"
-    }
-  ],
-
-  "r2_buckets": [
-    {
-      "binding": "BUCKET",
-      "bucket_name": "iptv-cf"
+      "database_id": "5b9c6e38-bc5c-48b4-82ef-e8e1c55f6c1b"
     }
   ],
 
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "REPLACE_ME_KV_ID"
+      "id": "7ed14c69568046de8cc2160a6db4bdba"
+    },
+    {
+      "binding": "BUCKET",
+      "id": "7ed14c69568046de8cc2160a6db4bdba"
     }
   ],
 
   "vars": {
-    "GITHUB_REPO": "REPLACE_ME/REPLACE_ME",
+    "GITHUB_REPO": "xu05236/iptv-cf",
     "CACHE_TTL_PLAYLIST": 60,
     "CACHE_TTL_EPG": 3600
   }
