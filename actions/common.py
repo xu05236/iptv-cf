@@ -34,11 +34,12 @@ def iso_now() -> str:
 # ---------- Worker internal API ----------
 def api(path: str, payload=None, timeout=120, raw_body: bytes = None):
     url = f"{WORKER_URL}{path}"
+    proxies = {"http": None, "https": None}  # Worker API 永远直连，不走代理
     if raw_body is not None:
         resp = requests.post(url, headers={"Authorization": f"Bearer {ADMIN_TOKEN}"},
-                             data=raw_body, timeout=timeout)
+                             data=raw_body, timeout=timeout, proxies=proxies)
     else:
-        resp = requests.post(url, headers=HEADERS, json=payload, timeout=timeout)
+        resp = requests.post(url, headers=HEADERS, json=payload, timeout=timeout, proxies=proxies)
     resp.raise_for_status()
     return resp.json()
 
