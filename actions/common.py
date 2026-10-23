@@ -141,7 +141,7 @@ def is_private_host(host: str) -> bool:
     try:
         ip = socket.gethostbyname(host)
     except Exception:
-        return True  # 解析不了按私有处理
+        return False  # 解析不了按私有处理
     if ip.startswith(("127.", "10.", "192.168.", "169.254.")) or ip.startswith("0."):
         return True
     if ip.startswith("172."):

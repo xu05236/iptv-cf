@@ -29,4 +29,6 @@ jobs:
         env:
           WORKER_URL: ${{ secrets.WORKER_URL }}
           ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          HTTPS_PROXY: ${{ secrets.SPEED_PROXY }}
+          HTTP_PROXY: ${{ secrets.SPEED_PROXY }}
         run: python actions/speed_test.py
