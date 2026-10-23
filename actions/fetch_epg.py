@@ -52,9 +52,21 @@ def download_one(url: str) -> bytes:
         if total > MAX_EPG_BYTES:
             raise RuntimeError(f"{url}: oversize >{MAX_EPG_BYTES}")
     data = b"".join(chunks)
-    if url.endswith(".gz") or resp.headers.get("Content-Encoding", "").lower() == "gzip" \
-            or data[:2] == b"\x1f\x8b":
-        data = gzip.decompress(data)
+    is_gzip = False
+    try:
+        if data[:2] == b"\x1f\x8b":        # 魔数判断优先
+            is_gzip = True
+        elif resp.headers.get("Content-Encoding", "").lower() == "gzip":
+            is_gzip = True
+        elif url.lower().endswith(".gz"):
+            is_gzip = True
+    except Exception:
+        pass
+    if is_gzip:
+        try:
+            data = gzip.decompress(data)
+        except Exception:
+            pass   # 解压失败就按原文继续（可能是伪装 .gz 的明文）
     return data
 
 
