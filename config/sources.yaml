@@ -25,6 +25,14 @@ sources:
   proxy_host: false
   type: m3u
   url: https://raw.githubusercontent.com/kimwang1978/collect-tv-txt/main/merged_output.m3u
+- name: iptv-org-in
+  proxy_host: false
+  type: m3u
+  url: https://raw.githubusercontent.com/iptv-org/iptv/master/streams/in.m3u
+- name: ssili126-tv
+  proxy_host: false
+  type: txt
+  url: https://raw.githubusercontent.com/ssili126/tv/main/itvlist.txt
 speed:
   concurrency: 10
   max_entries_per_run: 100
