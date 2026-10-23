@@ -9,18 +9,22 @@ epg:
   days: 7
   enabled: false
 sources:
-- name: fm-ipv6-m3u
+- name: fm-ipv6
   proxy_host: false
   type: m3u
   url: https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u
-- name: fm-tvlive-txt
-  proxy_host: false
-  type: txt
-  url: https://raw.githubusercontent.com/fanmingming/live/main/tvlive.txt
-- name: yuechan-live
+- name: fm-itv
   proxy_host: false
   type: m3u
-  url: https://raw.githubusercontent.com/yuechan/Live/main/iptv.m3u
+  url: https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/itv.m3u
+- name: iptv-org-cn
+  proxy_host: false
+  type: m3u
+  url: https://raw.githubusercontent.com/iptv-org/iptv/master/streams/cn.m3u
+- name: kimwang-merged
+  proxy_host: false
+  type: m3u
+  url: https://raw.githubusercontent.com/kimwang1978/collect-tv-txt/main/merged_output.m3u
 speed:
   concurrency: 10
   max_entries_per_run: 100
