@@ -9,14 +9,18 @@ epg:
   days: 7
   enabled: false
 sources:
-- name: fanmingming-ipv6
+- name: fm-ipv6-m3u
   proxy_host: false
   type: m3u
   url: https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/ipv6.m3u
-- name: fanmingming-global
+- name: fm-tvlive-txt
+  proxy_host: false
+  type: txt
+  url: https://raw.githubusercontent.com/fanmingming/live/main/tvlive.txt
+- name: yuechan-live
   proxy_host: false
   type: m3u
-  url: https://raw.githubusercontent.com/fanmingming/live/main/tv/m3u/global.m3u
+  url: https://raw.githubusercontent.com/yuechan/Live/main/iptv.m3u
 speed:
   concurrency: 10
   max_entries_per_run: 100
